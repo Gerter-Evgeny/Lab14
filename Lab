@@ -1,0 +1,61 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#define is_upper(c) ((c) >= 'A' && (c) <= 'Z')
+using namespace std;
+bool file_delch(const char* filename) 
+{
+    ifstream fin(filename, ifstream::binary);
+    if (!fin)
+        return false;
+
+    fin.seekg(0, fin.end);
+    int n = fin.tellg();
+    if (n <= 0) {
+        fin.close();
+        return false;
+    }
+    fin.seekg(0, fin.beg);
+
+    string buf;
+    buf.resize(n);
+    fin.read(&buf[0], n);
+    fin.close();
+
+    ofstream fout(filename, ofstream::binary);
+    if (!fout)
+        return false;
+
+    string::size_type p, m = buf.length();
+    for (std::string::size_type i = 0; i < m; ++i) 
+    {
+        p = i;
+        while ((i < m) && !is_upper(buf[i]))
+            ++i;
+
+        if (i > p)
+            fout.write(&buf[p], i - p);
+
+        if ((i < m) && is_upper(buf[i]))
+            ++i;
+
+        p = i;
+        while ((i < m) && !is_upper(buf[i]))
+            ++i;
+
+        if ((i == m) && (i > p)) 
+        {
+            fout.write(&buf[p - 1], i - p + 1);
+            break;
+        }
+    }
+    fout.flush();
+    fout.close();
+    return true;
+}
+
+int main(void) {
+    file_delch("file.txt");
+    cin.get();
+    return 0;
+}
